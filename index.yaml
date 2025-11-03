@@ -3,12 +3,12 @@ entries:
   lgtm-lbac-proxy:
   - apiVersion: v2
     appVersion: 0.14.0
-    created: "2025-11-03T03:22:21.093386672Z"
+    created: "2025-11-03T03:31:31.971256771Z"
     description: A Helm chart for LGTM LBAC Proxy with flexible multi-label enforcement
-    digest: 4aae242c1f2f81de45f9de1456965612d9730cbe3151c5472553949cc54cff66
+    digest: 062146b22c7f01ba00b31368bd57295919209f7a8c1d965a92b42b27ac4dd2a1
     name: lgtm-lbac-proxy
     type: application
     urls:
     - https://binhnguyenduc.github.io/helm-charts/lgtm-lbac-proxy-1.11.0.tgz
     version: 1.11.0
-generated: "2025-11-03T03:22:21.09235301Z"
+generated: "2025-11-03T03:31:31.970258358Z"
