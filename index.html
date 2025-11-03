@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>binhnguyenduc Helm Chart Repository</title>
+    <link
+      rel="preconnect"
+      href="https://cdn.jsdelivr.net"
+      crossorigin
+    />
+    <link
+      rel="preconnect"
+      href="https://cdnjs.cloudflare.com"
+      crossorigin
+    />
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background-color: #f5f5f5;
+        color: #1a1a1a;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 3rem 1rem;
+        background: linear-gradient(135deg, #f5f5f5 0%, #e9eef8 100%);
+      }
+      .container {
+        width: min(960px, 100%);
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 16px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.15);
+        backdrop-filter: blur(6px);
+        padding: 2.5rem;
+      }
+      h1 {
+        margin-top: 0;
+        font-size: clamp(2rem, 4vw, 2.75rem);
+        letter-spacing: 0.02em;
+        color: #0f172a;
+      }
+      p {
+        line-height: 1.6;
+      }
+      code {
+        display: inline-block;
+        padding: 0.125rem 0.375rem;
+        border-radius: 6px;
+        background-color: rgba(15, 23, 42, 0.08);
+        font-size: 0.95rem;
+      }
+      pre {
+        background-color: #0f172a;
+        color: #f8fafc;
+        padding: 1rem 1.25rem;
+        border-radius: 10px;
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1.5rem;
+      }
+      th,
+      td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+        vertical-align: top;
+      }
+      th {
+        font-weight: 700;
+        color: #0f172a;
+        background-color: rgba(148, 163, 184, 0.2);
+      }
+      tbody tr:hover {
+        background-color: rgba(59, 130, 246, 0.12);
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        background-color: rgba(37, 99, 235, 0.15);
+        color: #1d4ed8;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      .status {
+        margin-top: 2rem;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        background-color: rgba(59, 130, 246, 0.12);
+        color: #1d4ed8;
+        font-weight: 600;
+      }
+      .error {
+        background-color: rgba(239, 68, 68, 0.15);
+        color: #b91c1c;
+      }
+      a {
+        color: #2563eb;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>binhnguyenduc Helm Chart Repository</h1>
+      <p>
+        Add this repository to Helm:
+      </p>
+      <pre><code>helm repo add binhnguyenduc https://binhnguyenduc.github.io/helm-charts/
+helm repo update</code></pre>
+      <p>
+        Source charts live in their respective upstream repositories. This page
+        lists the packaged releases served from
+        <code>binhnguyenduc/helm-charts</code> for direct download.
+      </p>
+
+      <div id="status" class="status">Loading available charts…</div>
+      <div id="charts"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+    <script>
+      const statusEl = document.getElementById("status");
+      const chartsEl = document.getElementById("charts");
+
+      function formatDate(value) {
+        if (!value) return "—";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return value;
+        return date.toLocaleString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      function renderCharts(data) {
+        if (!data || !data.entries || Object.keys(data.entries).length === 0) {
+          statusEl.textContent = "No chart packages published yet.";
+          return;
+        }
+        statusEl.textContent = `Last index generation: ${formatDate(
+          data.generated
+        )}`;
+
+        const charts = Object.entries(data.entries).sort(([a], [b]) =>
+          a.localeCompare(b)
+        );
+
+        const table = document.createElement("table");
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Chart</th>
+              <th>Version</th>
+              <th>App Version</th>
+              <th>Description</th>
+              <th>Download</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        `;
+
+        const tbody = table.querySelector("tbody");
+
+        charts.forEach(([chartName, versions]) => {
+          const sortedVersions = [...versions].sort((a, b) => {
+            const dateA = a.created ? new Date(a.created).getTime() : 0;
+            const dateB = b.created ? new Date(b.created).getTime() : 0;
+            if (dateA === dateB) {
+              return (b.version || "").localeCompare(a.version || "");
+            }
+            return dateB - dateA;
+          });
+
+          sortedVersions.forEach((release, index) => {
+            const row = document.createElement("tr");
+
+            if (index === 0) {
+              row.classList.add("latest");
+            }
+
+            row.innerHTML = `
+              <td>
+                <strong>${chartName}</strong>
+                ${index === 0 ? '<span class="badge">Latest</span>' : ""}
+                <div style="font-size: 0.85rem; color: #475569;">
+                  Published ${formatDate(release.created)}
+                </div>
+              </td>
+              <td>${release.version || "—"}</td>
+              <td>${release.appVersion || "—"}</td>
+              <td>${release.description || "—"}</td>
+              <td>
+                ${
+                  release.urls && release.urls.length
+                    ? `<a href="${release.urls[0]}" download>Download</a>`
+                    : "—"
+                }
+              </td>
+            `;
+
+            tbody.appendChild(row);
+          });
+        });
+
+        chartsEl.replaceChildren(table);
+      }
+
+      fetch("index.yaml", { cache: "no-cache" })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to fetch index.yaml (${response.status})`);
+          }
+          return response.text();
+        })
+        .then((yamlText) => {
+          const parsed = jsyaml.load(yamlText);
+          renderCharts(parsed);
+        })
+        .catch((error) => {
+          console.error(error);
+          statusEl.textContent =
+            "Unable to load chart index. Please try again later.";
+          statusEl.classList.add("error");
+        });
+    </script>
+  </body>
+</html>
